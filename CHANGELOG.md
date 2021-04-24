@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 1.0.2
+
+- Twitter profile pictures are now returned in their original quality. (#131)
+- Youtube thumbnails are now in medium quality instead of standard definition to get a rectangular shaped image. (#127)
+
+## 1.0.1
+
+- Dev: You can now set the Base URL flag with the `CHATTERINO_API_BASE_URL` environment variable. (#123)
+  Note that the priority will always be CLI Argument > Environment Variable, so passing `-b` to the application will negate any environment variables set.
+- Dev: Add Dockerfile (#125)
+- Dev: You can now set the Base URL flag with the `CHATTERINO_API_BIND_ADDRESS` environment variable. (#124)
+  Note that the priority will always be CLI Argument > Environment Variable.
+
 ## 1.0.0
 
 - Non-Windows builds now use `discord/lilliput` to support animated GIFs and static WebP thumbnails. (#119)
