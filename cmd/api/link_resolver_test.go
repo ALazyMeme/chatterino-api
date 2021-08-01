@@ -17,7 +17,7 @@ import (
 func TestResolveTwitchClip(t *testing.T) {
 	router := chi.NewRouter()
 	cfg := config.New()
-	defaultresolver.Initialize(router, cfg)
+	defaultresolver.Initialize(router, cfg, nil)
 	ts := httptest.NewServer(router)
 	defer ts.Close()
 	fmt.Println(ts.URL)
@@ -45,7 +45,7 @@ func TestResolveTwitchClip(t *testing.T) {
 func TestResolveTwitchClip2(t *testing.T) {
 	router := chi.NewRouter()
 	cfg := config.New()
-	defaultresolver.Initialize(router, cfg)
+	defaultresolver.Initialize(router, cfg, nil)
 	ts := httptest.NewServer(router)
 	defer ts.Close()
 	const url = `https%3A%2F%2Ftwitch.tv%2Fpajlada%2Fclip%2FGorgeousAntsyPizzaSaltBae`
@@ -59,6 +59,90 @@ func TestResolveTwitchClip2(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	var jsonResponse resolver.Response
+	err = json.Unmarshal(body, &jsonResponse)
+	if err != nil {
+		panic(err)
+	}
+	if jsonResponse.Status != 200 {
+		t.Fatal("wrong status from api")
+	}
+}
+
+func TestResolveYouTubeChannelUserStandard(t *testing.T) {
+	router := chi.NewRouter()
+	cfg := config.New()
+	defaultresolver.Initialize(router, cfg, nil)
+	ts := httptest.NewServer(router)
+	defer ts.Close()
+	fmt.Println(ts.URL)
+	const url = `https%3A%2F%2Fwww.youtube.com%2Fuser%2Fpenguinz0`
+	res, err := http.Get(ts.URL + "/link_resolver/" + url)
+	if err != nil {
+		panic(err)
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(body))
+	var jsonResponse resolver.Response
+	err = json.Unmarshal(body, &jsonResponse)
+	if err != nil {
+		panic(err)
+	}
+	if jsonResponse.Status != 200 {
+		t.Fatal("wrong status from api")
+	}
+}
+
+func TestResolveYouTubeChannelUserShortened(t *testing.T) {
+	router := chi.NewRouter()
+	cfg := config.New()
+	defaultresolver.Initialize(router, cfg, nil)
+	ts := httptest.NewServer(router)
+	defer ts.Close()
+	fmt.Println(ts.URL)
+	const url = `https%3A%2F%2Fwww.youtube.com%2Fc%2FMizkifDaily`
+	res, err := http.Get(ts.URL + "/link_resolver/" + url)
+	if err != nil {
+		panic(err)
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(body))
+	var jsonResponse resolver.Response
+	err = json.Unmarshal(body, &jsonResponse)
+	if err != nil {
+		panic(err)
+	}
+	if jsonResponse.Status != 200 {
+		t.Fatal("wrong status from api")
+	}
+}
+
+func TestResolveYouTubeChannelIdentifier(t *testing.T) {
+	router := chi.NewRouter()
+	cfg := config.New()
+	defaultresolver.Initialize(router, cfg, nil)
+	ts := httptest.NewServer(router)
+	defer ts.Close()
+	fmt.Println(ts.URL)
+	const url = `https%3A%2F%2Fwww.youtube.com%2Fchannel%2FUCoqDr5RdFOlomTQI2tkaDOA`
+	res, err := http.Get(ts.URL + "/link_resolver/" + url)
+	if err != nil {
+		panic(err)
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(body))
 	var jsonResponse resolver.Response
 	err = json.Unmarshal(body, &jsonResponse)
 	if err != nil {
