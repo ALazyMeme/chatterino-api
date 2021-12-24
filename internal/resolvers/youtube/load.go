@@ -39,14 +39,23 @@ func loadVideos(videoID string, r *http.Request) (interface{}, time.Duration, er
 		return &resolver.Response{Status: 500, Message: "video unavailable"}, cache.NoSpecialDur, nil
 	}
 
+	// Check if a video is age resricted: https://stackoverflow.com/a/33750307
+	var ageRestricted = false
+	if video.ContentDetails.ContentRating != nil {
+		if video.ContentDetails.ContentRating.YtRating == "ytAgeRestricted" {
+			ageRestricted = true
+		}
+	}
+
 	data := youtubeVideoTooltipData{
-		Title:        video.Snippet.Title,
-		ChannelTitle: video.Snippet.ChannelTitle,
-		Duration:     humanize.DurationPT(video.ContentDetails.Duration),
-		PublishDate:  humanize.CreationDateRFC3339(video.Snippet.PublishedAt),
-		Views:        humanize.Number(video.Statistics.ViewCount),
-		LikeCount:    humanize.Number(video.Statistics.LikeCount),
-		DislikeCount: humanize.Number(video.Statistics.DislikeCount),
+		Title:         video.Snippet.Title,
+		ChannelTitle:  video.Snippet.ChannelTitle,
+		Duration:      humanize.DurationPT(video.ContentDetails.Duration),
+		PublishDate:   humanize.CreationDateRFC3339(video.Snippet.PublishedAt),
+		Views:         humanize.Number(video.Statistics.ViewCount),
+		LikeCount:     humanize.Number(video.Statistics.LikeCount),
+		CommentCount:  humanize.Number(video.Statistics.CommentCount),
+		AgeRestricted: ageRestricted,
 	}
 
 	var tooltip bytes.Buffer
@@ -102,17 +111,17 @@ func loadChannels(channelCacheKey string, r *http.Request) (interface{}, time.Du
 	}
 
 	switch channelID.chanType {
-		case UserChannel:
-			builtRequest = builtRequest.ForUsername(channelID.ID)
-		case IdentifierChannel:
-			builtRequest = builtRequest.Id(channelID.ID)
-		case CustomChannel:
-			builtRequest = builtRequest.Id(channelID.ID)
-		case InvalidChannel:
-			return &resolver.Response{
-				Status:  500,
-				Message: "cached channel ID is invalid",
-			}, 1 * time.Hour, nil
+	case UserChannel:
+		builtRequest = builtRequest.ForUsername(channelID.ID)
+	case IdentifierChannel:
+		builtRequest = builtRequest.Id(channelID.ID)
+	case CustomChannel:
+		builtRequest = builtRequest.Id(channelID.ID)
+	case InvalidChannel:
+		return &resolver.Response{
+			Status:  500,
+			Message: "cached channel ID is invalid",
+		}, 1 * time.Hour, nil
 	}
 
 	youtubeResponse, err := builtRequest.Do()
@@ -131,10 +140,10 @@ func loadChannels(channelCacheKey string, r *http.Request) (interface{}, time.Du
 	channel := youtubeResponse.Items[0]
 
 	data := youtubeChannelTooltipData{
-		Title:        channel.Snippet.Title,
+		Title:       channel.Snippet.Title,
 		JoinedDate:  humanize.CreationDateRFC3339(channel.Snippet.PublishedAt),
-		Subscribers:  humanize.Number(channel.Statistics.SubscriberCount),
-		Views:        humanize.Number(channel.Statistics.ViewCount),
+		Subscribers: humanize.Number(channel.Statistics.SubscriberCount),
+		Views:       humanize.Number(channel.Statistics.ViewCount),
 	}
 
 	var tooltip bytes.Buffer
